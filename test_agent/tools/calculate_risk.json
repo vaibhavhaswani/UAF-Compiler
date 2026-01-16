@@ -1,0 +1,8 @@
+{
+    "type": "object",
+    "properties": {
+        "risk_factor": {
+            "type": "number"
+        }
+    }
+}

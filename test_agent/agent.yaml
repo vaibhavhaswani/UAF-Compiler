@@ -1,0 +1,15 @@
+version: "1.0"
+format: "uaf"
+name: "risk-assessment-agent"
+type: "langgraph"
+runtime: "python"
+entrypoint: "agent.py:create_agent"
+tools:
+  - name: "calculate_risk"
+    description: "Calculate risk metrics"
+    schema: "tools/calculate_risk.json"
+metadata:
+    author: "Test Org"
+    version: "1.0.0"
+    langchain_version: ">=0.2.0"
+    langgraph_version: ">=0.3.0"
