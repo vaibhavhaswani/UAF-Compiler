@@ -1,84 +1,83 @@
-import sys
 import os
-import tarfile
-import yaml
-import importlib.util
-import tempfile
-import shutil
-from langgraph.graph import StateGraph, MessagesState, START, END
+import sys
 from langchain_core.messages import HumanMessage
 
-# --- User's desired logic adapted for .tar.gz (UAF implementation) ---
+# Try importing ChatOllama (supports both newer and older langchain versions)
+try:
+    from langchain_ollama import ChatOllama
+except ImportError:
+    from langchain_community.chat_models import ChatOllama
 
-def load_uaf(uaf_path: str):
-    """Load a Universal Agent Format file (tar.gz implementation)"""
-    print(f"Loading UAF from: {uaf_path}")
-    
-    # Extract to temp dir for execution
-    agent_dir = tempfile.mkdtemp(prefix="uaf_run_")
-    with tarfile.open(uaf_path, 'r:gz') as archive:
-        archive.extractall(path=agent_dir)
-    
-    # Add to path so imports work if needed
-    sys.path.insert(0, agent_dir)
-    
-    # Read manifest
-    with open(os.path.join(agent_dir, 'agent.yaml'), 'r') as f:
-        manifest = yaml.safe_load(f)
-    
-    entrypoint = manifest['entrypoint']
-    runtime = manifest.get('runtime', 'python')
-    
-    print(f"Agent Info: {manifest['name']} ({runtime})")
-    
-    if runtime == 'python':
-        module_name, func_name = entrypoint.split(':')
-        module_path = os.path.join(agent_dir, f"{module_name}.py" if not module_name.endswith('.py') else module_name)
-        
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        
-        factory_func = getattr(module, func_name)
-        # Create and return the agent instance (callable/node)
-        return factory_func()
-    
-    else:
-        raise NotImplementedError(f"Runtime {runtime} not supported in this test script.")
-
-# --- LangGraph Integration Test ---
+# Import the Universal Agent File Loader
+from uaf_compiler.loader import UAFLoader
 
 def main():
-    uaf_file = "test_agent/my-agent.uaf"
+    # ---------------------------------------------------------
+    # 1. Setup Paths
+    # ---------------------------------------------------------
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    # The UAF file we want to load (compiled artifact)
+    uaf_file = os.path.join(base_dir, "test_agent", "mathematics-reasoning-agent.uaf")
     
-    # 1. Load the agent from UAF
-    try:
-        agent_node = load_uaf(uaf_file)
-    except Exception as e:
-        print(f"Failed to load UAF: {e}")
+    if not os.path.exists(uaf_file):
+        print(f"❌ Error: Agent file not found: {uaf_file}")
+        print("   Please compile it first using the CLI:")
+        print("   uaf compile -f test_agent/uaf_setup.yaml")
         return
 
-    # 2. Build Graph
-    print("Building StateGraph...")
-    builder = StateGraph(MessagesState)
+    # ---------------------------------------------------------
+    # 2. Initialize Runtime Dependencies
+    # ---------------------------------------------------------
+    # The agent functionality relies on an LLM provided by the host.
+    print("🔌 Initializing Host LLM (Ollama: gemma3:4b)...")
+    llm = ChatOllama(
+        base_url="http://localhost:11434",
+        model="gemma3:4b",
+        temperature=0
+    )
+
+    # ---------------------------------------------------------
+    # 3. Load the Agent
+    # ---------------------------------------------------------
+    try:
+        print(f"📦 Loading UAF Agent from: {os.path.basename(uaf_file)}")
+        
+        # Initialize loader with the file path
+        agent = UAFLoader(uaf_file)
+        
+        # Load the agent and inject dependencies (kwargs match agent factory args)
+        agent_app = agent.load(llm=llm)
+        
+        print("✅ Agent loaded successfully!")
+        
+    except Exception as e:
+        print(f"❌ Failed to load agent: {e}")
+        return
+
+    # ---------------------------------------------------------
+    # 4. Execute the Agent
+    # ---------------------------------------------------------
+    query = "Calculate 10 added to 20"
+    print(f"\n🚀 Invoking Agent with query: '{query}'")
     
-    # Add the loaded agent as a node
-    builder.add_node("agent", agent_node)
+    initial_state = {"messages": [HumanMessage(content=query)]}
     
-    # Simple flow
-    builder.add_edge(START, "agent")
-    builder.add_edge("agent", END)
-    
-    graph = builder.compile()
-    
-    # 3. Invoke
-    print("Invoking Graph...")
-    initial_state = {"messages": [HumanMessage(content="Start verification")]}
-    result = graph.invoke(initial_state)
-    
-    print("\n--- Result ---")
-    print(result)
-    print("Test passed!")
+    try:
+        # Run the agent graph
+        result = agent_app.invoke(initial_state)
+        
+        # ---------------------------------------------------------
+        # 5. Inspect Results
+        # ---------------------------------------------------------
+        print("\n--- Execution Trace ---")
+        for msg in result['messages']:
+            print(f"[{type(msg).__name__}]: {msg.content}")
+            
+        final_msg = result['messages'][-1]
+        print(f"\n🏁 Final Output: {final_msg.content}")
+        
+    except Exception as e:
+        print(f"❌ Error during execution: {e}")
 
 if __name__ == "__main__":
     main()

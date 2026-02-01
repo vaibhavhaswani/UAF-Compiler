@@ -1,140 +1,164 @@
-# Universal Agent File (UAF) Compiler & Protocol
 
-The **Universal Agent File (UAF)** is a standardized binary format and protocol for packaging, distributing, and running AI agents. It wraps agent implementation code, dependencies, metadata, and tool definitions into a single portable `.uaf` file (gzip-compressed tarball).
+<div align="center">
 
-The **UAF Compiler** is a CLI tool to build, validate, inspect, and run these agent files, making agents "plug-and-play" across different environments (e.g., LangChain, LangGraph).
+# 📦 Universal Agent File (UAF) Compiler & Protocol
 
-## Features
+**The Standard Binary Format for Plug-and-Play AI Agents**
 
-- **Standardized Format**: Defines a strict schema (`agent.yaml`) for agent metadata, runtime, and tools.
-- **Compilation**: Bundles source code and assets into a signed-like `.uaf` binary.
-- **Validation**: Enforces strict checks for required files (entrypoints, dependencies, tool schemas) to prevent broken builds.
-- **Inspection**: Allows peering into the contents and metadata of an existing `.uaf` file without extracting it.
-- **Runtime Loader**: Provides a Python API to dynamically load and execute agents from `.uaf` files directly into frameworks like LangGraph.
-- **Cross-Platform**: Available as an MSI installer for Windows and DEB package for Linux.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)]()
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![Status](https://img.shields.io/badge/Status-Active-success)]()
 
-## Installation
+[Features](#-features) •
+[Installation](#-installation) •
+[Usage](#-usage) •
+[Protocol](#-protocol-specification) •
+[Integration](#-langgraph-integration)
 
-### Windows
-Download and run the provided `.msi` installer.
-- The installer adds `uaf` to your system `PATH`.
-- Default installation directory: `C:\Program Files\UAFCompiler`.
+</div>
 
-### Linux (Debian/Ubuntu)
-Install the `.deb` package:
+---
+
+## 🚀 Overview
+
+The **Universal Agent File (UAF)** is a standardized binary format and protocol designed to solve the fragmentation in AI agent distribution. It packages agent implementation code, dependencies, metadata, and tool definitions into a single, portable, and verifiable `.uaf` artifact (gzip-compressed tarball).
+
+The **UAF Compiler** is the CLI toolchain that empowers developers to **build**, **validate**, **inspect**, and **run** these agents, making them truly "plug-and-play" across diverse runtime environments like LangChain and LangGraph.
+
+## ✨ Features
+
+- **📦 Standardized Packaging**: Bundles code, assets, and definitions into a unified signed-like `.uaf` binary.
+- **🛡️ Strict Validation**: Enforces schema compliance (`agent.yaml`) and ensures all dependencies and entrypoints are valid before build.
+- **🔍 Deep Inspection**: Introspect agent metadata, versioning, and capabilities without needing to extract or run code.
+- **🔌 Runtime Loader**: Dynamic Python API to load execution graphs directly from `.uaf` files into host applications.
+- **🖥️ Cross-Platform**: Native installers for **Windows** (MSI with PATH integration) and **Linux** (DEB packages).
+
+## 🛠️ Installation
+
+### 🪟 Windows
+Download and run the MSI installer. It automatically configures your system `PATH`.
+*Default Location:* `C:\Program Files\UAFCompiler`
+
+### 🐧 Linux (Debian/Ubuntu)
+Install via the standardized DEB package:
 ```bash
 sudo apt install ./uaf-compiler_0.1.0-1_all.deb
 ```
-This automatically handles dependencies like `python3-pydantic` and `python3-yaml`.
+*Note: Automatically resolves dependencies like `python3-pydantic`.*
 
-### From Source
+### 🐍 From Source
 ```bash
+git clone https://github.com/your-username/uaf-compiler.git
+cd uaf-compiler
 pip install .
 ```
 
-## Usage
+## ⚡ Quick Start: Zero to Agent
 
-### 1. Project Structure
-A standard UAF agent project looks like this:
+How to turn your local python files into a portable, plug-and-play **Universal Agent**.
+
+### 1. Prepare Your Folder
+Assume you have a directory with your agent code:
 
 ```text
-my-agent-project/
-├── agent.yaml              # (Required) Protocol metadata & manifest
-├── agent.py                # (Required) Agent implementation code
-├── requirements.txt        # (Recommended) Python dependencies
-├── uaf_setup.yaml          # (Required for build) build configuration
-└── tools/                  # (Optional) Tool definitions
-    └── calculate_risk.json
+my-agent/
+├── agent.py                # Your logic (LangGraph, LangChain, etc.)
+├── requirements.txt        # Dependencies
+├── agent.yaml              # Metadata (Name, version, tools)
+└── uaf_setup.yaml          # Build instructions
 ```
 
-### 2. CLI Commands
+### 2. Configure the Build
+Create a `uaf_setup.yaml` to tell the compiler what files to include. This is the **bridge** between your folder and the UAF binary.
 
-**Compile an Agent**
-Builds the `.uaf` file based on the `uaf_setup.yaml` manifest.
-```bash
-uaf compile -f uaf_setup.yaml
-```
-
-**Validate an Agent**
-Checks the `.uaf` file for schema compliance and missing assets.
-```bash
-uaf validate my-agent.uaf
-```
-
-**Inspect an Agent**
-View metadata and file listing without unpacking.
-```bash
-uaf inspect my-agent.uaf
-```
-
-**Run/Test an Agent**
-Loads and executes the agent's entrypoint in a temporary environment.
-```bash
-uaf run my-agent.uaf
-```
-
-### 3. schemas
-
-**agent.yaml** (Protocol Definition)
 ```yaml
-version: "1.0"
-format: "uaf"
-name: "risk-assessment-agent"
-type: "langgraph"           # or "langchain"
-runtime: "python"           # or "wasm"
-entrypoint: "agent.py:create_agent" # module:factory_function
-tools:
-  - name: "calculate_risk"
-    description: "Calculate risk metrics"
-    schema: "tools/calculate_risk.json"
-metadata:
-    author: "Your Org"
-    version: "1.0.0"
-```
-
-**uaf_setup.yaml** (Build Configuration)
-Maps your local source files to their destination inside the `.uaf` archive.
-```yaml
+# uaf_setup.yaml
 output: my-agent.uaf
 files:
   agent.yaml: ./agent.yaml
   agent.py: ./agent.py
   requirements.txt: ./requirements.txt
-  tools/calculate_risk.json: ./tools/calculate_risk.json
+  # Add any other folders or assets:
+  # tools/: ./tools/
 ```
 
-## Integration with LangGraph
+### 3. Compile
+Run the compiler in your terminal. This validates your schema, checks paths, and signs the bundle.
 
-The UAF framework allows you to load agents dynamically into LangGraph workflows.
+```bash
+uaf compile -f uaf_setup.yaml
+```
+
+**✅ Success!** You now have `my-agent.uaf`. 
+This single file contains everything needed to run your agent anywhere the UAF runtime is installed.
+
+---
+
+## 💻 CLI Commands
+
+| Command | Usage | Description |
+| :--- | :--- | :--- |
+| **`compile`** | `uaf compile -f <config>` | **Convert folder → .uaf**. Builds the binary artifact. |
+| **`validate`** | `uaf validate <file.uaf>` | Checks if a `.uaf` file is valid and safe to load. |
+| **`inspect`** | `uaf inspect <file.uaf>` | Peek inside a UAF file (view metadata/files) without extracting. |
+| **`run`** | `uaf run <file.uaf>` | Spin up the agent in a sandbox for immediate testing. |
+
+---
+
+## 🔗 LangGraph Integration
+
+Plug your compiled agent directly into your application.
 
 ```python
 from uaf_compiler.loader import UAFLoader
 from langgraph.graph import StateGraph
 
-# Load the agent node from the binary
+# Load from file - no loose scripts required
 loader = UAFLoader("my-agent.uaf")
-agent_factory, meta = loader.load()
-agent_node = agent_factory()
 
-# Integrate into Graph
-builder = StateGraph(State)
-builder.add_node("agent", agent_node)
-# ... build rest of graph ...
+# Load and inject dependencies in one step
+agent_node = loader.load(llm=llm)
+
+# Add to graph
+graph.add_node("agent", agent_node)
 ```
 
-## Building the Compiler
+---
 
-### Windows (MSI)
-Requires `cx_Freeze`.
+## 📝 Configuration Reference
+
+### The Manifest (`agent.yaml`)
+Required file describing the agent's identity.
+
+```yaml
+version: "1.0"
+format: "uaf"
+name: "math-solver"
+type: "langgraph"
+runtime: "python"
+entrypoint: "agent.py:create_agent"
+tools: [] 
+metadata:
+    author: "Me"
+    version: "1.0.0"
+```
+
+## 🏗️ Development
+
+### Build Artifacts
+**Windows (MSI)**
 ```bash
-pip install -r requirements_win.txt
 python setup_win.py bdist_msi
 ```
-Output: `dist/uaf_compiler-0.1.0-win64.msi`
 
-### Linux (DEB)
-Requires `stdeb`, `fakeroot`, `build-essential`.
+**Linux (DEB)**
 ```bash
-bash build_deb.sh
+./build_deb.sh
 ```
-Output: `deb_dist/uaf-compiler_0.1.0-1_all.deb`
+
+---
+
+<div align="center">
+    <sub>Built with ❤️ by Vaibhav Haswani as a part of DefaultLoop Project. Released under Apache 2.0 License.</sub>
+</div>

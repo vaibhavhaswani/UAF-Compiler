@@ -4,7 +4,10 @@ from pydantic import BaseModel, Field
 class ToolDefinition(BaseModel):
     name: str
     description: str
-    schema_file: str = Field(alias="schema") 
+    # 'schema' in yaml maps to 'schema_file' here. Make it optional.
+    schema_file: Optional[str] = Field(default=None, alias="schema")
+    # 'file' in yaml maps to 'file_path' here. 
+    file_path: Optional[str] = Field(default=None, alias="file") 
 
 class Metadata(BaseModel):
     author: Optional[str] = None

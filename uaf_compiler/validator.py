@@ -53,11 +53,20 @@ class UAFValidator:
             # Strict: Validate Tools existence
             if agent_config.tools:
                 for tool in agent_config.tools:
-                     schema_path = tool.schema_file
-                     try:
-                        tar.getmember(schema_path)
-                        print(f"  [OK] Tool schema '{schema_path}' found.")
-                     except KeyError:
-                         print(f"  [WARNING] Tool schema file '{schema_path}' for tool '{tool.name}' is missing from archive.")
+                     # Check python tool file
+                     if tool.file_path:
+                         try:
+                            tar.getmember(tool.file_path)
+                            print(f"  [OK] Tool implementation '{tool.file_path}' found.")
+                         except KeyError:
+                             raise ValueError(f"Tool implementation file '{tool.file_path}' for tool '{tool.name}' is missing from archive.")
+                     
+                     # Check schema file (if exists)
+                     if tool.schema_file:
+                         try:
+                            tar.getmember(tool.schema_file)
+                            print(f"  [OK] Tool schema '{tool.schema_file}' found.")
+                         except KeyError:
+                             raise ValueError(f"Tool schema file '{tool.schema_file}' for tool '{tool.name}' is missing from archive.")
 
             print("UAF Validation Successful.")

@@ -1,6 +1,6 @@
-output: my-agent.uaf
+output: mathematics-reasoning-agent.uaf
 files:
   agent.yaml: ./agent.yaml
   agent.py: ./agent.py
   requirements.txt: ./requirements.txt
-  tools/calculate_risk.json: ./tools/calculate_risk.json
+  tools/math_tools.py: ./tools/math_tools.py
