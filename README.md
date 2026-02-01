@@ -6,6 +6,7 @@
 **The Standard Binary Format for Plug-and-Play AI Agents**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![PyPI](https://img.shields.io/badge/pypi-v0.1.0-blue)](https://pypi.org/project/uaf-compiler/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)]()
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/Status-Active-success)]()
@@ -24,7 +25,7 @@
 
 The **Universal Agent File (UAF)** is a standardized binary format and protocol designed to solve the fragmentation in AI agent distribution. It packages agent implementation code, dependencies, metadata, and tool definitions into a single, portable, and verifiable `.uaf` artifact (gzip-compressed tarball).
 
-The **UAF Compiler** is the CLI toolchain that empowers developers to **build**, **validate**, **inspect**, and **run** these agents, making them truly "plug-and-play" across diverse runtime environments like LangChain and LangGraph.
+The **UAF Compiler** is the CLI toolchain that empower developers to **build**, **validate**, **inspect**, and **run** these agents, making them truly "plug-and-play" across diverse runtime environments like LangChain and LangGraph.
 
 ## ✨ Features
 
@@ -36,20 +37,29 @@ The **UAF Compiler** is the CLI toolchain that empowers developers to **build**,
 
 ## 🛠️ Installation
 
-### 🪟 Windows
+### 🚀 Recommended (PyPI)
+Install the latest stable version directly from PyPI:
+
+```bash
+pip install uaf_compiler
+```
+
+### Other Methods
+
+#### 🪟 Windows (MSI)
 Download and run the MSI installer. It automatically configures your system `PATH`.
 *Default Location:* `C:\Program Files\UAFCompiler`
 
-### 🐧 Linux (Debian/Ubuntu)
+#### 🐧 Linux (Debian/Ubuntu)
 Install via the standardized DEB package:
 ```bash
 sudo apt install ./uaf-compiler_0.1.0-1_all.deb
 ```
 *Note: Automatically resolves dependencies like `python3-pydantic`.*
 
-### 🐍 From Source
+#### 🐍 From Source
 ```bash
-git clone https://github.com/your-username/uaf-compiler.git
+git clone https://github.com/DefaultLoop/uaf-compiler.git
 cd uaf-compiler
 pip install .
 ```
