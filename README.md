@@ -148,7 +148,7 @@ For the complete CLI command reference and detailed `agent.yaml` schema formatti
 The UAF loader natively extracts and executes agents regardless of their framework architecture. 
 
 ### Loading an AgentComet Agent
-Because it recognizes the AgentComet SDK through the UAF manifest, the compiler uses a dedicated runtime loader for class instantiation:
+AgentComet has a **built-in UAF loader** natively integrated into the SDK. Because it recognizes the SDK through the explicit manifest, it natively extracts and initializes your custom class logic:
 
 ```python
 from agentcomet import load_agent
