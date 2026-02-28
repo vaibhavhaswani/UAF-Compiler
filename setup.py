@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="uaf_compiler",
+    name="uaf",
     version="0.1.3",
     author="Vaibhav Haswani",
     author_email="vaibhavhaswani@gmail.com", # Placeholder or need to ask? I'll use a generic one or omit if unsure, but author field is good. I will use the name provided.

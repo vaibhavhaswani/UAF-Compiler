@@ -35,31 +35,20 @@ The **UAF Compiler** is the universal CLI toolchain that empowers developers to 
 - **🛡️ Strict Validation**: Enforces schema compliance (`agent.yaml`) and ensures all dependencies and entrypoints are valid before build.
 - **🔍 Deep Inspection**: Introspect agent metadata, versioning, and capabilities without needing to extract or run code.
 - **🔌 Runtime Loader**: Dynamic Python API to load execution graphs directly from `.uaf` files into host applications.
-- **🖥️ Cross-Platform**: Native installers for **Windows** (MSI with PATH integration) and **Linux** (DEB packages).
+- **🖥️ Cross-Platform**: Native Python tooling running directly on **Windows**, **Linux**, and **macOS**.
 
 ## 🛠️ Installation
 
-### 🚀 Recommended (PyPI)
-Install the latest stable version directly from PyPI:
+The Universal Agent File compiler is distributed exclusively as a native Python package. Because it serves as a developer compilation toolchain, `pip` is the only required installation method.
+
+### 🚀 Recommended
+Install the latest stable version directly from PyPI (Python 3.9+ required):
 
 ```bash
-pip install uaf_compiler
+pip install uaf
 ```
 
-### Other Methods
-
-#### 🪟 Windows (MSI)
-Download and run the MSI installer. It automatically configures your system `PATH`.
-*Default Location:* `C:\Program Files\UAFCompiler`
-
-#### 🐧 Linux (Debian/Ubuntu)
-Install via the standardized DEB package:
-```bash
-sudo apt install ./uaf-compiler_0.1.0-1_all.deb
-```
-*Note: Automatically resolves dependencies like `python3-pydantic`.*
-
-#### 🐍 From Source
+### 🐍 From Source
 ```bash
 git clone https://github.com/vaibhavhaswani/UAF-Compiler.git
 cd uaf-compiler
@@ -219,17 +208,7 @@ dependencies:
 ```
 
 ## 🏗️ Development
-
-### Build Artifacts
-**Windows (MSI)**
-```bash
-python setup_win.py bdist_msi
-```
-
-**Linux (DEB)**
-```bash
-./build_deb.sh
-```
+The UAF Compiler uses standard `setuptools` building pipelines. Run native unit tests and packaging directly via standard python workflows.
 
 ---
 
