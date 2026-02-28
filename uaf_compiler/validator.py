@@ -1,7 +1,7 @@
 import tarfile
 import yaml
 import io
-from .schema import AgentYaml
+from .schema import UAFv2AgentYaml
 from pydantic import ValidationError
 
 class UAFValidator:
@@ -28,7 +28,7 @@ class UAFValidator:
             content = f.read()
             try:
                 data = yaml.safe_load(content)
-                agent_config = AgentYaml(**data)
+                agent_config = UAFv2AgentYaml(**data)
                 print("  [OK] agent.yaml schema validation passed.")
             except ValidationError as e:
                 raise ValueError(f"agent.yaml inside archive is invalid: {e}")
@@ -36,7 +36,8 @@ class UAFValidator:
                  raise ValueError(f"agent.yaml inside archive is not valid YAML: {e}")
 
             # Check entrypoint existence
-            entrypoint_file = agent_config.entrypoint.split(":")[0]
+            entrypoint_module = agent_config.runtime.entrypoint.split(":")[0]
+            entrypoint_file = entrypoint_module if entrypoint_module.endswith(".py") else f"{entrypoint_module}.py"
             try:
                 tar.getmember(entrypoint_file)
                 print(f"  [OK] Entrypoint file '{entrypoint_file}' exists in archive.")
@@ -50,23 +51,22 @@ class UAFValidator:
             except KeyError:
                 print("  [WARNING] requirements.txt is missing. Agent may fail to run without dependencies.")
 
-            # Strict: Validate Tools existence
-            if agent_config.tools:
-                for tool in agent_config.tools:
-                     # Check python tool file
-                     if tool.file_path:
-                         try:
-                            tar.getmember(tool.file_path)
-                            print(f"  [OK] Tool implementation '{tool.file_path}' found.")
-                         except KeyError:
-                             raise ValueError(f"Tool implementation file '{tool.file_path}' for tool '{tool.name}' is missing from archive.")
-                     
-                     # Check schema file (if exists)
-                     if tool.schema_file:
-                         try:
-                            tar.getmember(tool.schema_file)
-                            print(f"  [OK] Tool schema '{tool.schema_file}' found.")
-                         except KeyError:
-                             raise ValueError(f"Tool schema file '{tool.schema_file}' for tool '{tool.name}' is missing from archive.")
+            # Check tools.py if custom tools are declared
+            if agent_config.tools and agent_config.tools.custom:
+                try:
+                    tar.getmember("tools.py")
+                    print(f"  [OK] tools.py found for {len(agent_config.tools.custom)} custom tool(s).")
+                except KeyError:
+                    print(f"  [WARNING] Custom tools declared ({agent_config.tools.custom}) but tools.py not found in archive.")
+
+            # Check agent.state if state is enabled
+            if agent_config.state and agent_config.state.enabled:
+                state_file = agent_config.state.file or "agent.state"
+                try:
+                    tar.getmember(state_file)
+                    print(f"  [OK] State file '{state_file}' found.")
+                except KeyError:
+                    print(f"  [WARNING] State is enabled but '{state_file}' not found in archive.")
 
             print("UAF Validation Successful.")
+

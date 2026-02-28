@@ -76,13 +76,12 @@ def main():
     elif args.command == "run":
         try:
             loader = UAFLoader(args.file)
-            agent_factory, meta = loader.load()
-            print(f"Successfully loaded agent '{meta.name}' version {meta.version}")
-            print(f"Running entrypoint...")
-            # Execute the factory
-            agent_instance = agent_factory()
-            print(f"Result: {agent_instance}")
-            # loader.cleanup() # Keep it for inspection if needed, or cleanup
+            agent = loader.load()
+            agent_name = loader.meta.agent.name if loader.meta else "unknown"
+            agent_version = loader.meta.agent.version if loader.meta else "unknown"
+            sdk_name = loader.meta.sdk.name if loader.meta and loader.meta.sdk else "generic"
+            print(f"Successfully loaded agent '{agent_name}' v{agent_version} (SDK: {sdk_name})")
+            print(f"Agent instance: {agent}")
         except Exception as e:
             print(f"Run failed: {e}")
             import traceback

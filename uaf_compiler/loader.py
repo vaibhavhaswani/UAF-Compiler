@@ -5,7 +5,7 @@ import os
 import importlib.util
 import shutil
 import tempfile
-from .schema import AgentYaml
+from .schema import UAFv2AgentYaml
 from .updater import UAFUpdater
 
 class UAFLoader:

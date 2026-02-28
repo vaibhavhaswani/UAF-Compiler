@@ -90,16 +90,32 @@ langchain
 uaf-compiler
 """,
             "agent.yaml": """
-version: "1.0"
-format: "uaf"
-name: "{name}"
-type: "langchain"
-runtime: "python"
-entrypoint: "agent:create_agent"
-tools: []
-metadata:
-    author: "Unknown"
-    version: "0.1.0"
+uaf_version: 2
+
+agent:
+  name: "{name}"
+  version: 0.1.0
+  description: LangChain Agent
+  author: Unknown
+
+runtime:
+  engine: python
+  entrypoint: agent:create_agent
+
+sdk:
+  name: langchain
+  version: 0.1.0
+
+tools:
+  builtin: []
+  custom:
+    - example_tool
+
+state:
+  enabled: false
+
+dependencies:
+  auto: true
 """
         },
         "langgraph": {
@@ -121,16 +137,31 @@ langgraph
 uaf-compiler
 """,
             "agent.yaml": """
-version: "1.0"
-format: "uaf"
-name: "{name}"
-type: "langgraph"
-runtime: "python"
-entrypoint: "agent:create_agent"
-tools: []
-metadata:
-    author: "Unknown"
-    version: "0.1.0"
+uaf_version: 2
+
+agent:
+  name: "{name}"
+  version: 0.1.0
+  description: LangGraph Agent
+  author: Unknown
+
+runtime:
+  engine: python
+  entrypoint: agent:create_agent
+
+sdk:
+  name: langgraph
+  version: 0.1.0
+
+tools:
+  builtin: []
+  custom: []
+
+state:
+  enabled: false
+
+dependencies:
+  auto: true
 """
         },
         "crewai": {
@@ -153,16 +184,31 @@ crewai
 uaf-compiler
 """,
             "agent.yaml": """
-version: "1.0"
-format: "uaf"
-name: "{name}"
-type: "crewai"
-runtime: "python"
-entrypoint: "agent:create_crew"
-tools: []
-metadata:
-    author: "Unknown"
-    version: "0.1.0"
+uaf_version: 2
+
+agent:
+  name: "{name}"
+  version: 0.1.0
+  description: CrewAI Agent
+  author: Unknown
+
+runtime:
+  engine: python
+  entrypoint: agent:create_crew
+
+sdk:
+  name: crewai
+  version: 0.1.0
+
+tools:
+  builtin: []
+  custom: []
+
+state:
+  enabled: false
+
+dependencies:
+  auto: true
 """
         },
         "google-adk": {
@@ -182,16 +228,31 @@ google-generativeai
 uaf-compiler
 """,
             "agent.yaml": """
-version: "1.0"
-format: "uaf"
-name: "{name}"
-type: "google-adk"
-runtime: "python"
-entrypoint: "agent:create_agent"
-tools: []
-metadata:
-    author: "Unknown"
-    version: "0.1.0"
+uaf_version: 2
+
+agent:
+  name: "{name}"
+  version: 0.1.0
+  description: Google ADK Agent
+  author: Unknown
+
+runtime:
+  engine: python
+  entrypoint: agent:create_agent
+
+sdk:
+  name: google-adk
+  version: 0.1.0
+
+tools:
+  builtin: []
+  custom: []
+
+state:
+  enabled: false
+
+dependencies:
+  auto: true
 """
         }
     }
