@@ -26,17 +26,16 @@ To load an agent, you simply point to the `.uaf` file and call `.load()`. Based 
 
 #### AgentComet Example (Recommended)
 ```python
-from uaf_compiler.loader import UAFLoader
+from agentcomet import load_agent
 
-# 1. Initialize the loader
-loader = UAFLoader("agents/my-math-bot.uaf")
+# Load the AgentComet instance directly using its native SDK wrapper
+loaded_agent = load_agent("agents/my-math-bot.uaf")
+print("Loaded agent type:", type(loaded_agent))
 
-# 2. Load the AgentComet instance directly
-agent = loader.load()
-
-# 3. Use the agent natively
-response = agent.run("What is 5 times 10?")
-print(response)
+# Use the agent natively
+if loaded_agent:
+    response = loaded_agent.run("What is 5 times 10?")
+    print(response)
 ```
 
 #### Generic Framework Example (LangChain / LangGraph / CrewAI)

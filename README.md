@@ -135,15 +135,11 @@ This single file contains everything needed to run your agent anywhere the UAF r
 
 ---
 
-## 💻 CLI Commands
+## 💻 CLI Commands & Configuration
 
-| Command | Usage | Description |
-| :--- | :--- | :--- |
-| **`compile`** | `uaf compile -f <config>` | **Convert folder → .uaf**. Builds the binary artifact. |
-| **`validate`** | `uaf validate <file.uaf>` | Checks if a `.uaf` file is valid and safe to load. |
-| **`inspect`** | `uaf inspect <file.uaf>` | Peek inside a UAF file (view metadata/files) without extracting. |
-| **`run`** | `uaf run <file.uaf>` | Spin up the agent in a sandbox for immediate testing. |
-| **`update`** | `uaf update <file.uaf> -f <file>` | Add or update a file inside an existing UAF archive. |
+The UAF Compiler ships with a powerful CLI suite to `init`, `compile`, `validate`, `inspect`, `run`, and `update` your agents. 
+
+For the complete CLI command reference and detailed `agent.yaml` schema formatting, please refer to the [**Usage Guide**](docs/usage_guide.md).
 
 ---
 
@@ -155,12 +151,14 @@ The UAF loader natively extracts and executes agents regardless of their framewo
 Because it recognizes the AgentComet SDK through the UAF manifest, the compiler uses a dedicated runtime loader for class instantiation:
 
 ```python
-from uaf_compiler.loader import UAFLoader
+from agentcomet import load_agent
 
-loader = UAFLoader("math-bot.uaf")
-# Automatically runs agent.setup() and returns the loaded instance
-agent = loader.load() 
-response = agent.run("What is 5 multiplied by 10?")
+loaded_agent = load_agent("math-bot.uaf")
+print("Loaded agent type:", type(loaded_agent))
+
+if loaded_agent:
+    response = loaded_agent.run("What is 5 multiplied by 10?")
+    print(response)
 ```
 
 ### Loading a LangGraph / LangChain Agent
@@ -174,38 +172,7 @@ agent_factory = loader.load(llm=my_llm)
 
 ---
 
-## 📝 Configuration Reference
 
-### The V2 Manifest (`agent.yaml`)
-The required layout declaring the explicit UAFv2 rules for SDK resolution.
-
-```yaml
-uaf_version: 2
-
-agent:
-  name: "math-bot"
-  version: "0.1.0"
-  description: "Simple math assistant"
-
-runtime:
-  engine: "python"
-  entrypoint: "agent:MyAgent"
-
-sdk:
-  name: "agentcomet"
-  version: "0.1.0"
-
-tools:
-  builtin: ["calculator"]
-  custom: ["multiply"]
-
-state:
-  enabled: true
-  file: "agent.state"
-
-dependencies:
-  auto: true
-```
 
 ## 🏗️ Development
 The UAF Compiler uses standard `setuptools` building pipelines. Run native unit tests and packaging directly via standard python workflows.

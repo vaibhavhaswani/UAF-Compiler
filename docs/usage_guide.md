@@ -181,6 +181,43 @@ uaf update my-agent.uaf -f ./hotfix.py -n agent.py
 
 ---
 
+## 📝 Configuration Reference
+
+Before compiling an agent, its identity is declared in `agent.yaml`. This file tells the UAF compiler how to bundle, route, and execute the agent natively.
+
+### The V2 Manifest (`agent.yaml`)
+The required layout declaring the explicit UAFv2 rules for SDK compilation and runtime resolution.
+
+```yaml
+uaf_version: 2
+
+agent:
+  name: "math-bot"
+  version: "0.1.0"
+  description: "Simple math assistant"
+
+runtime:
+  engine: "python"
+  entrypoint: "agent:MyAgent"
+
+sdk:
+  name: "agentcomet"
+  version: "0.1.0"
+
+tools:
+  builtin: ["calculator"]
+  custom: ["multiply"]
+
+state:
+  enabled: true
+  file: "agent.state"
+
+dependencies:
+  auto: true
+```
+
+---
+
 ## ❓ Getting Help
 
 To see global help or help for a specific command, use the `--help` flag.

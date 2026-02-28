@@ -43,9 +43,13 @@ class MyAgent(Agent):
 ### Execution Strategy
 When loader parses `sdk: agentcomet`, it calls the specialized `AgentCometRuntime`:
 ```python
-from uaf_compiler.loader import UAFLoader
-agent = UAFLoader("math-bot.uaf").load()
-agent.run("Start task")
+from agentcomet import load_agent
+
+loaded_agent = load_agent("math-bot.uaf")
+print("Loaded agent type:", type(loaded_agent))
+
+if loaded_agent:
+    print(loaded_agent.run("Start task"))
 ```
 
 ---
