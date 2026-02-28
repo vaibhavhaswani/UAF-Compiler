@@ -68,3 +68,6 @@ uaf_agent_*/
 # Temporary files
 tmp/
 *.log
+
+# Documentation
+docs/uaf_system_architecture.md

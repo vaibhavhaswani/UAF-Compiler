@@ -25,7 +25,9 @@
 
 The **Universal Agent File (UAF)** is a standardized binary format and protocol designed to solve the fragmentation in AI agent distribution. It packages agent implementation code, dependencies, metadata, and tool definitions into a single, portable, and verifiable `.uaf` artifact (gzip-compressed tarball).
 
-The **UAF Compiler** is the CLI toolchain that empower developers to **build**, **validate**, **inspect**, and **run** these agents, making them truly "plug-and-play" across diverse runtime environments like LangChain and LangGraph.
+The **UAF Compiler** is the universal CLI toolchain that empowers developers to **build**, **validate**, **inspect**, and **run** agents. It serves as the standard compiler across all major agentic frameworks, including **LangChain**, **CrewAI**, **LangGraph**, and **Google ADK**. 
+
+🌟 **Highly Recommended:** UAF is the native and officially recommended compiler for building agents on the **AgentComet** platform.
 
 ## ✨ Features
 
@@ -59,9 +61,46 @@ sudo apt install ./uaf-compiler_0.1.0-1_all.deb
 
 #### 🐍 From Source
 ```bash
-git clone https://github.com/DefaultLoop/uaf-compiler.git
+git clone https://github.com/vaibhavhaswani/UAF-Compiler.git
 cd uaf-compiler
 pip install .
+```
+
+## ☄️ AgentComet Integration (Recommended)
+
+UAF Compiler is designed to tightly integrate with AgentComet's native SDK. You can instantly scaffold an AgentComet UAF project using the `init` command:
+
+```bash
+uaf init --name math-bot --type agentcomet
+```
+
+### Writing Your AgentComet Agent
+
+UAF seamlessly bundles your logic written precisely with AgentComet's class-based SDK properties:
+
+**`agent.py`**
+```python
+from agentcomet import Agent
+from agentcomet.tools import calculator
+from tools import multiply
+
+class MyAgent(Agent):
+    def setup(self):
+        self.use_llm("ollama:llama3")
+        self.enable_memory()
+        self.add_tools(calculator, multiply)
+
+    def run(self, input: str):
+        return self.chat(input)
+```
+
+**`tools.py`**
+```python
+from agentcomet.tools import tool
+
+@tool
+def multiply(a: int, b: int) -> int:
+    return a * b
 ```
 
 ## ⚡ Quick Start: Zero to Agent
@@ -76,6 +115,7 @@ my-agent/
 ├── agent.py                # Your logic (LangGraph, LangChain, etc.)
 ├── requirements.txt        # Dependencies
 ├── agent.yaml              # Metadata (Name, version, tools)
+├── agent.state             # (Optional) Persistent state file
 └── uaf_setup.yaml          # Build instructions
 ```
 
@@ -89,6 +129,7 @@ files:
   agent.yaml: ./agent.yaml
   agent.py: ./agent.py
   requirements.txt: ./requirements.txt
+  agent.state: ./agent.state        # Optional: Persistent state
   # Add any other folders or assets:
   # tools/: ./tools/
 ```
@@ -113,45 +154,68 @@ This single file contains everything needed to run your agent anywhere the UAF r
 | **`validate`** | `uaf validate <file.uaf>` | Checks if a `.uaf` file is valid and safe to load. |
 | **`inspect`** | `uaf inspect <file.uaf>` | Peek inside a UAF file (view metadata/files) without extracting. |
 | **`run`** | `uaf run <file.uaf>` | Spin up the agent in a sandbox for immediate testing. |
+| **`update`** | `uaf update <file.uaf> -f <file>` | Add or update a file inside an existing UAF archive. |
 
 ---
 
-## 🔗 LangGraph Integration
+## 🔗 Framework Loading Examples
 
-Plug your compiled agent directly into your application.
+The UAF loader natively extracts and executes agents regardless of their framework architecture. 
+
+### Loading an AgentComet Agent
+Because it recognizes the AgentComet SDK through the UAF manifest, the compiler uses a dedicated runtime loader for class instantiation:
 
 ```python
 from uaf_compiler.loader import UAFLoader
-from langgraph.graph import StateGraph
 
-# Load from file - no loose scripts required
-loader = UAFLoader("my-agent.uaf")
+loader = UAFLoader("math-bot.uaf")
+# Automatically runs agent.setup() and returns the loaded instance
+agent = loader.load() 
+response = agent.run("What is 5 multiplied by 10?")
+```
 
-# Load and inject dependencies in one step
-agent_node = loader.load(llm=llm)
+### Loading a LangGraph / LangChain Agent
+```python
+from uaf_compiler.loader import UAFLoader
 
-# Add to graph
-graph.add_node("agent", agent_node)
+loader = UAFLoader("my-langchain-agent.uaf")
+# Retrieve the graph/agent factory directly
+agent_factory = loader.load(llm=my_llm)
 ```
 
 ---
 
 ## 📝 Configuration Reference
 
-### The Manifest (`agent.yaml`)
-Required file describing the agent's identity.
+### The V2 Manifest (`agent.yaml`)
+The required layout declaring the explicit UAFv2 rules for SDK resolution.
 
 ```yaml
-version: "1.0"
-format: "uaf"
-name: "math-solver"
-type: "langgraph"
-runtime: "python"
-entrypoint: "agent.py:create_agent"
-tools: [] 
-metadata:
-    author: "Me"
-    version: "1.0.0"
+uaf_version: 2
+
+agent:
+  name: "math-bot"
+  version: "0.1.0"
+  description: "Simple math assistant"
+
+runtime:
+  engine: "python"
+  entrypoint: "agent:MyAgent"
+
+sdk:
+  name: "agentcomet"
+  version: "0.1.0"
+
+tools:
+  builtin: ["calculator"]
+  custom: ["multiply"]
+
+state:
+  enabled: true
+  file: "agent.state"
+
+dependencies:
+  auto: true
 ```
 
 ## 🏗️ Development
@@ -170,5 +234,5 @@ python setup_win.py bdist_msi
 ---
 
 <div align="center">
-    <sub>Built with ❤️ by Vaibhav Haswani as a part of DefaultLoop Project. Released under Apache 2.0 License.</sub>
+    <sub>Built with ❤️ by Vaibhav Haswani as a part of AgentComet Project. Released under Apache 2.0 License.</sub>
 </div>

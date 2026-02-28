@@ -6,65 +6,101 @@ import importlib.util
 import shutil
 import tempfile
 from .schema import AgentYaml
+from .updater import UAFUpdater
 
 class UAFLoader:
     def __init__(self, uaf_path: str):
         self.uaf_path = uaf_path
         self.agent_dir = tempfile.mkdtemp(prefix="uaf_agent_")
         self.meta = None
+        self.pending_updates = {} # Map of internal_name -> source_path
 
-    def load_factory(self):
+    def update(self, file_path: str, type: str):
         """
-        Loads the agent source and returns the factory function.
-        Call the factory function with arguments to get the runnable agent.
+        Queue an update for the UAF archive.
+        
+        Args:
+            file_path: Path to the local file source.
+            type: Type of file to update. Supported: 'state', 'code', 'requirements', 'config'.
         """
-        if not os.path.exists(self.agent_dir) or not os.listdir(self.agent_dir):
-             self._extract()
-
-        # Add to path if not already there
-        if self.agent_dir not in sys.path:
-            sys.path.insert(0, self.agent_dir)
+        valid_types = {
+            "state": "agent.state",
+            "code": "agent.py",
+            "requirements": "requirements.txt",
+            "config": "agent.yaml"
+        }
         
-        # Load Entrypoint
-        if not self.meta:
-            self._load_metadata()
-
-        # entrypoint format: module:function
-        try:
-            module_name, func_name = self.meta.entrypoint.split(":")
-        except ValueError:
-            raise ValueError(f"Invalid entrypoint format: {self.meta.entrypoint}. Expected module:function")
+        if type not in valid_types:
+            raise ValueError(f"Invalid update type '{type}'. Supported: {list(valid_types.keys())}")
             
-        module_path = os.path.join(self.agent_dir, module_name if module_name.endswith(".py") else f"{module_name}.py")
-        
-        if not os.path.exists(module_path):
-             raise ValueError(f"Entrypoint module {module_path} not found.")
-
-        try:
-            spec = importlib.util.spec_from_file_location(module_name, module_path)
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-        except Exception as e:
-            raise ImportError(f"Failed to import agent module: {e}")
-        
-        if not hasattr(module, func_name):
-            raise ValueError(f"Function {func_name} not found in {module_name}")
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"Source file not found: {file_path}")
             
-        factory = getattr(module, func_name)
-        return factory
+        internal_name = valid_types[type]
+        self.pending_updates[internal_name] = file_path
+        print(f"  [Loader] Queued update for '{internal_name}' from '{file_path}'")
+
+    def apply_updates(self):
+        """
+        Commit all pending updates to the UAF file.
+        """
+        if not self.pending_updates:
+            print("Nothing to update")
+            return "Nothing to update"
+            
+        print(f"Applying {len(self.pending_updates)} updates to {self.uaf_path}...")
+        
+        # Use UAFUpdater to apply updates. 
+        # Note: Ideally UAFUpdater should support batch updates, but for now we loop.
+        # Since UAFUpdater repacks on every call, this is inefficient for many files.
+        # But for 1-2 files it is acceptable.
+        
+        updater = UAFUpdater(self.uaf_path)
+        
+        for name, src_path in self.pending_updates.items():
+            updater.update(src_path, archive_name=name)
+            
+        # Clear pending
+        self.pending_updates = {}
+        print("All updates applied successfully.")
+        return "Updates applied"
 
     def load(self, **kwargs):
         """
-        High-level API to load and instantiate the agent.
-        
-        Args:
-            **kwargs: Dependencies to inject into the agent factory (e.g., llm=...).
-            
-        Returns:
-            The instantiated agent node/graph.
+        High-level API to load and instantiate the agent using dynamic SDK routing.
         """
-        factory = self.load_factory()
-        return factory(**kwargs)
+        if not self.meta:
+            if not os.path.exists(self.agent_dir) or not os.listdir(self.agent_dir):
+                self._extract()
+            self._load_metadata()
+
+        from .runtimes.agentcomet import AgentCometRuntime
+        from .runtimes.generic import GenericUAFRuntime
+
+        if getattr(self.meta, 'sdk', None) and self.meta.sdk.name == "agentcomet":
+            print(f"  [Loader] Routing to AgentCometRuntime (SDK: {self.meta.sdk.name})")
+            runtime = AgentCometRuntime(self)
+        else:
+            sdk_name = self.meta.sdk.name if getattr(self.meta, 'sdk', None) else "unknown"
+            print(f"  [Loader] Routing to GenericUAFRuntime (SDK: {sdk_name})")
+            runtime = GenericUAFRuntime(self)
+
+        return runtime.load(**kwargs)
+
+    def load_factory(self):
+        """
+        Legacy entry point for factory getters.
+        Warning: This is not guaranteed to return a function on class-based SDKs.
+        """
+        if not self.meta:
+            if not os.path.exists(self.agent_dir) or not os.listdir(self.agent_dir):
+                self._extract()
+            self._load_metadata()
+            
+        from .runtimes.generic import GenericUAFRuntime
+        # Always use generic to return a factory for backwards compatibility
+        runtime = GenericUAFRuntime(self)
+        return runtime._load_factory()
 
     def _extract(self):
         print(f"Loading agent from {self.uaf_path} into {self.agent_dir}...")
@@ -78,7 +114,8 @@ class UAFLoader:
              raise ValueError("agent.yaml missing in archive")
         
         with open(agent_yaml_path, "r") as f:
-            self.meta = AgentYaml(**yaml.safe_load(f))
+            from .schema import UAFv2AgentYaml # Inline import to avoid circular errors or clean up global definition
+            self.meta = UAFv2AgentYaml(**yaml.safe_load(f))
 
     def cleanup(self):
         shutil.rmtree(self.agent_dir)

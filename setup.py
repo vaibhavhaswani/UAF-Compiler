@@ -7,13 +7,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setup(
     name="uaf_compiler",
-    version="0.1.1",
+    version="0.1.3",
     author="Vaibhav Haswani",
-    author_email="vaibhav@defaultloop.com", # Placeholder or need to ask? I'll use a generic one or omit if unsure, but author field is good. I will use the name provided.
+    author_email="vaibhavhaswani@gmail.com", # Placeholder or need to ask? I'll use a generic one or omit if unsure, but author field is good. I will use the name provided.
     description="Universal Agent File (UAF) Compiler & Protocol",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/DefaultLoop/uaf-compiler", # Assuming URL based on project name
+    url="https://github.com/vaibhavhaswani/UAF-Compiler",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

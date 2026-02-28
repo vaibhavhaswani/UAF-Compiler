@@ -1,0 +1,19 @@
+uaf_version: 2
+agent:
+  name: "crewai_complex"
+  version: "1.0.0"
+  description: "CrewAI complex testing"
+  author: "Tester"
+runtime:
+  engine: "python"
+  entrypoint: "agent:create_crew"
+sdk:
+  name: "crewai"
+  version: "0.1.0"
+tools:
+  builtin: []
+  custom: ["analyze_data"]
+state:
+  enabled: false
+dependencies:
+  auto: true

@@ -4,3 +4,4 @@ files:
   agent.py: ./agent.py
   requirements.txt: ./requirements.txt
   tools/math_tools.py: ./tools/math_tools.py
+  agent.state: ./agent.state

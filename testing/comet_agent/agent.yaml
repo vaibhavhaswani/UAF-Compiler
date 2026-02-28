@@ -1,0 +1,24 @@
+uaf_version: 2
+agent:
+  name: "math-bot"
+  version: "0.1.0"
+  description: "Simple math assistant"
+  author: "Vaibhav"
+runtime:
+  engine: "python"
+  entrypoint: "agent:MyAgent"
+sdk:
+  name: "agentcomet"
+  version: "0.1.0"
+tools:
+  builtin:
+    - "read"
+    - "write"
+    - "calculator"
+  custom:
+    - "multiply"
+state:
+  enabled: true
+  file: "agent.state"
+dependencies:
+  auto: true
