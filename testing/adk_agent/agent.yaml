@@ -2,14 +2,14 @@ uaf_version: 2
 agent:
   name: "adk_complex"
   version: "1.0.0"
-  description: "ADK complex testing"
+  description: "Google ADK agent with weather and stock tools, powered by Ollama via LiteLlm"
   author: "Tester"
 runtime:
   engine: "python"
   entrypoint: "agent:create_agent"
 sdk:
   name: "google-adk"
-  version: "0.1.0"
+  version: "1.27.1"
 tools:
   builtin: []
   custom: ["fetch_weather", "get_stock_price"]

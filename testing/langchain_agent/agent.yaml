@@ -2,7 +2,7 @@ uaf_version: 2
 agent:
   name: "langchain_complex"
   version: "1.0.0"
-  description: "LangChain complex testing"
+  description: "LangChain complex agent with math and database tools"
   author: "Tester"
 runtime:
   engine: "python"

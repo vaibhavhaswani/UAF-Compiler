@@ -2,23 +2,19 @@ uaf_version: 2
 agent:
   name: "math-bot"
   version: "0.1.0"
-  description: "Simple math assistant"
+  description: "AgentComet math assistant using native Ollama LLM provider"
   author: "Vaibhav"
 runtime:
   engine: "python"
-  entrypoint: "agent:MyAgent"
+  entrypoint: "agent:create_agent"
 sdk:
-  name: "agentcomet"
+  name: "agentcomet-factory"
   version: "0.1.0"
 tools:
-  builtin:
-    - "read"
-    - "write"
-    - "calculator"
+  builtin: []
   custom:
     - "multiply"
 state:
-  enabled: true
-  file: "agent.state"
+  enabled: false
 dependencies:
   auto: true
