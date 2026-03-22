@@ -22,8 +22,8 @@ warnings.filterwarnings("ignore", category=ImportWarning)
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from langchain_core.messages import HumanMessage
-from uaf_compiler.builder import UAFBuilder
-from uaf_compiler.loader import UAFLoader
+from uaf.builder import UAFBuilder
+from uaf.loader import UAFLoader
 
 OLLAMA_BASE_URL = "http://localhost:11434"
 OLLAMA_MODEL = "gemma3:4b"

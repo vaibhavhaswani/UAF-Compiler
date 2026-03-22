@@ -6,8 +6,8 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="uaf",
-    version="0.1.3",
+    name="uaf_cli",
+    version="0.8.0",
     author="Vaibhav Haswani",
     author_email="vaibhavhaswani@gmail.com", # Placeholder or need to ask? I'll use a generic one or omit if unsure, but author field is good. I will use the name provided.
     description="Universal Agent File (UAF) Compiler & Protocol",
@@ -27,7 +27,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "uaf=uaf_compiler.main:main",
+            "uaf=uaf.main:main",
         ],
     },
 )

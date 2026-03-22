@@ -1,21 +1,22 @@
-
 <div align="center">
 
-# 📦 Universal Agent File (UAF) Compiler & Protocol
+# 📦 Universal Agent File (UAF) — The Standard for Portable AI Agents
 
-**The Standard Binary Format for Plug-and-Play AI Agents**
+**Package once. Run anywhere. Share stateful AI agents as binaries.**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![PyPI](https://img.shields.io/badge/pypi-v0.1.0-blue)](https://pypi.org/project/uaf-compiler/)
+[![PyPI](https://img.shields.io/badge/pypi-v0.8.0-blue)](https://pypi.org/project/uaf-cli/)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux-lightgrey)]()
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
 [![Status](https://img.shields.io/badge/Status-Active-success)]()
 
+[Overview](#-overview) •
 [Features](#-features) •
 [Installation](#-installation) •
-[Usage](#-usage) •
-[Protocol](#-protocol-specification) •
-[Integration](#-langgraph-integration)
+[Quick Start](#-quick-start) •
+[CLI](#-cli) •
+[Specification](#-protocol-specification) •
+[AgentComet](#-agentcomet-upcoming-framework)
 
 </div>
 
@@ -23,162 +24,171 @@
 
 ## 🚀 Overview
 
-The **Universal Agent File (UAF)** is a standardized binary format and protocol designed to solve the fragmentation in AI agent distribution. It packages agent implementation code, dependencies, metadata, and tool definitions into a single, portable, and verifiable `.uaf` artifact (gzip-compressed tarball).
+**Universal Agent File (UAF)** is a **standardized binary format** for packaging and distributing AI agents.
 
-The **UAF Compiler** is the universal CLI toolchain that empowers developers to **build**, **validate**, **inspect**, and **run** agents. It serves as the standard compiler across all major agentic frameworks, including **LangChain**, **CrewAI**, **LangGraph**, and **Google ADK**. 
+It solves a core problem in the agent ecosystem:
 
-🌟 **Highly Recommended:** UAF is the native and officially recommended compiler for building agents on the **AgentComet** platform.
+> ❌ Agents are fragmented, framework-locked, and not portable
+> ✅ UAF makes agents **portable, reproducible, and shareable**
+
+A `.uaf` file is a compressed, verifiable artifact that bundles agent logic, dependencies, metadata, tools, and optional state.
+
+This enables:
+**Write once → run anywhere → resume anytime**
+
+---
 
 ## ✨ Features
 
-- **📦 Standardized Packaging**: Bundles code, assets, and definitions into a unified signed-like `.uaf` binary.
-- **🛡️ Strict Validation**: Enforces schema compliance (`agent.yaml`) and ensures all dependencies and entrypoints are valid before build.
-- **🔍 Deep Inspection**: Introspect agent metadata, versioning, and capabilities without needing to extract or run code.
-- **🔌 Runtime Loader**: Dynamic Python API to load execution graphs directly from `.uaf` files into host applications.
-- **🖥️ Cross-Platform**: Native Python tooling running directly on **Windows**, **Linux**, and **macOS**.
+* **📦 Portable Binary Format** - Package complete agents into a single `.uaf` file.
+* **🧠 Stateful Agents** - Persist and transfer agent memory across environments.
+* **🛡️ Strict Validation** - Enforced schema (`agent.yaml`) ensures reliability.
+* **🔍 Inspect Without Running** - View metadata, tools, and config without execution.
+* **🔌 Framework Agnostic** - Works across LangChain, LangGraph, CrewAI, Google ADK.
+* **⚡ Runtime Loader** - Dynamically load and execute agents from `.uaf`.
+
+---
 
 ## 🛠️ Installation
 
-The Universal Agent File compiler is distributed exclusively as a native Python package. Because it serves as a developer compilation toolchain, `pip` is the only required installation method.
-
-### 🚀 Recommended
-Install the latest stable version directly from PyPI (Python 3.9+ required):
+Install from PyPI (Python 3.9+):
 
 ```bash
-pip install uaf
+pip install uaf-cli
 ```
 
-### 🐍 From Source
+Or from source:
+
 ```bash
-git clone https://github.com/vaibhavhaswani/UAF-Compiler.git
-cd uaf-compiler
+git clone https://github.com/vaibhavhaswani/uaf-cli.git
+cd uaf-cli
 pip install .
 ```
 
-## ☄️ AgentComet Integration (Recommended)
+---
 
-UAF Compiler is designed to tightly integrate with AgentComet's native SDK. You can instantly scaffold an AgentComet UAF project using the `init` command:
+## ⚡ Quick Start
 
-```bash
-uaf init --name math-bot --type agentcomet
-```
+### 1️⃣ Project Structure
 
-### Writing Your AgentComet Agent
-
-UAF seamlessly bundles your logic written precisely with AgentComet's class-based SDK properties:
-
-**`agent.py`**
-```python
-from agentcomet import Agent
-from agentcomet.tools import calculator
-from tools import multiply
-
-class MyAgent(Agent):
-    def setup(self):
-        self.use_llm("ollama:llama3")
-        self.enable_memory()
-        self.add_tools(calculator, multiply)
-
-    def run(self, input: str):
-        return self.chat(input)
-```
-
-**`tools.py`**
-```python
-from agentcomet.tools import tool
-
-@tool
-def multiply(a: int, b: int) -> int:
-    return a * b
-```
-
-## ⚡ Quick Start: Zero to Agent
-
-How to turn your local python files into a portable, plug-and-play **Universal Agent**.
-
-### 1. Prepare Your Folder
-Assume you have a directory with your agent code:
+Create an agent folder with the following structure:
 
 ```text
 my-agent/
-├── agent.py                # Your logic (LangGraph, LangChain, etc.)
-├── requirements.txt        # Dependencies
-├── agent.yaml              # Metadata (Name, version, tools)
-├── agent.state             # (Optional) Persistent state file
-└── uaf_setup.yaml          # Build instructions
+├── agent.py          # Framework logic (LangChain, CrewAI, etc.)
+├── agent.yaml        # Manifest metadata
+├── requirements.txt  # Dependencies
+├── agent.state       # (Optional) Initial state
+└── uaf_setup.yaml    # Compiler build instructions
 ```
 
-### 2. Configure the Build
-Create a `uaf_setup.yaml` to tell the compiler what files to include. This is the **bridge** between your folder and the UAF binary.
+### 2️⃣ Configure Build (`uaf_setup.yaml`)
 
 ```yaml
-# uaf_setup.yaml
 output: my-agent.uaf
+
 files:
-  agent.yaml: ./agent.yaml
   agent.py: ./agent.py
+  agent.yaml: ./agent.yaml
   requirements.txt: ./requirements.txt
-  agent.state: ./agent.state        # Optional: Persistent state
-  # Add any other folders or assets:
-  # tools/: ./tools/
+  agent.state: ./agent.state
 ```
 
-### 3. Compile
-Run the compiler in your terminal. This validates your schema, checks paths, and signs the bundle.
+### 3️⃣ Compile
 
 ```bash
 uaf compile -f uaf_setup.yaml
 ```
 
-**✅ Success!** You now have `my-agent.uaf`. 
-This single file contains everything needed to run your agent anywhere the UAF runtime is installed.
+✅ **Output**: `my-agent.uaf`
 
 ---
 
-## 💻 CLI Commands & Configuration
+## 💻 CLI
 
-The UAF Compiler ships with a powerful CLI suite to `init`, `compile`, `validate`, `inspect`, `run`, and `update` your agents. 
+Compile, package, and execute agents with simple commands:
 
-For the complete CLI command reference and detailed `agent.yaml` schema formatting, please refer to the [**Usage Guide**](docs/usage_guide.md).
+```bash
+uaf init        # Scaffold absolute path project
+uaf compile     # Compile into .uaf artifact
+uaf validate    # Validate schema compliance
+uaf inspect     # View deep metadata
+uaf run         # Run CLI agent turn loop
+uaf update      # Inject incremental builds
+```
+
+Full technical guide → [`docs/usage_guide.md`](docs/usage_guide.md)
 
 ---
 
-## 🔗 Framework Loading Examples
+## 🔗 Loading Agents
 
-The UAF loader natively extracts and executes agents regardless of their framework architecture. 
+The `UAFLoader` dynamically routes directly into execution setups powered by target frame pipelines.
 
-### Loading an AgentComet Agent
-AgentComet has a **built-in UAF loader** natively integrated into the SDK. Because it recognizes the SDK through the explicit manifest, it natively extracts and initializes your custom class logic:
+```python
+from uaf_compiler.loader import UAFLoader
+
+# 1. Initialize Loader
+uaf_loader = UAFLoader("my-agent.uaf")
+
+# 2. Dynamic Router Injection
+# Load LangChain/LangGraph
+agent_app = uaf_loader.load(llm=my_llm)
+
+# Load CrewAI
+agent_crew = uaf_loader.load(llm_model="ollama/gemma3", base_url="http://...")
+
+# Load Google ADK
+agent_runner = uaf_loader.load(llm_model="ollama/gemma3", base_url="http://...")
+```
+
+Full Loading & Integration workflows → [`docs/integration.md`](docs/integration.md)
+
+---
+
+## 📜 Protocol Specification
+
+Complete binary spec design detailing underlying tarball structure, manifest validation rules, and lifecycle bindings.
+
+See frameworks & schema docs → [`docs/frameworks.md`](docs/frameworks.md)
+
+---
+
+## 🏗️ Development & Testing
+
+Standard installation and developer workflows:
+
+```bash
+pip install -e .
+```
+
+### Run End-to-End Tests
+To verify loaders and correct tool-use turn loops across all SDK adaptors (LangChain, CrewAI, ADK, Comet) over a local Ollama endpoint:
+
+```bash
+python testing/test_dummy_agents.py
+```
+
+---
+
+**AgentComet** natively loads and executes UAF agents using its SDK-level hooks without wrapping logic adapters.
 
 ```python
 from agentcomet import load_agent
 
-loaded_agent = load_agent("math-bot.uaf")
-print("Loaded agent type:", type(loaded_agent))
+# 1. Load UAF directly 
+agent = load_agent("my-agent.uaf")
 
-if loaded_agent:
-    response = loaded_agent.run("What is 5 multiplied by 10?")
-    print(response)
+# 2. Run agent natively
+response = agent.run("Calculate current stock performance")
+print("Response:", response)
+
+# 3. Export / Save state
+agent.export("my_assistant.uaf")
 ```
-
-### Loading a LangGraph / LangChain Agent
-```python
-from uaf_compiler.loader import UAFLoader
-
-loader = UAFLoader("my-langchain-agent.uaf")
-# Retrieve the graph/agent factory directly
-agent_factory = loader.load(llm=my_llm)
-```
-
----
-
-
-
-## 🏗️ Development
-The UAF Compiler uses standard `setuptools` building pipelines. Run native unit tests and packaging directly via standard python workflows.
 
 ---
 
 <div align="center">
-    <sub>Built with ❤️ by Vaibhav Haswani as a part of AgentComet Project. Released under Apache 2.0 License.</sub>
+    <sub>Built with ❤️ by Vaibhav Haswani • Apache 2.0 License</sub>
 </div>

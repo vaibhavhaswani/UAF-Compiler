@@ -5,12 +5,12 @@ import os
 # Ensure we can import modules from the current directory if running as a script
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from uaf_compiler.builder import UAFBuilder
-from uaf_compiler.validator import UAFValidator
-from uaf_compiler.inspector import UAFInspector
-from uaf_compiler.loader import UAFLoader
-from uaf_compiler.updater import UAFUpdater
-from uaf_compiler.scaffold import Scaffold
+from uaf.builder import UAFBuilder
+from uaf.validator import UAFValidator
+from uaf.inspector import UAFInspector
+from uaf.loader import UAFLoader
+from uaf.updater import UAFUpdater
+from uaf.scaffold import Scaffold
 
 def main():
     parser = argparse.ArgumentParser(description="Universal Agent File (UAF) Compiler")

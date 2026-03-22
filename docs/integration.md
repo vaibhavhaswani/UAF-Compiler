@@ -1,13 +1,13 @@
 # Python Integration Guide
 
-This guide details how to integrate UAF agents into your Python applications using the native `uaf_compiler` API.
+This guide details how to integrate UAF agents into your Python applications using the native `uaf` API.
 
 ## Installation
 
 Ensure the package is installed:
 
 ```bash
-pip install uaf_compiler
+pip install uaf
 ```
 
 ## The `UAFLoader` Class
@@ -17,7 +17,10 @@ The core class for interacting with `.uaf` files is `UAFLoader`. It handles extr
 ### Import
 
 ```python
-from uaf_compiler.loader import UAFLoader
+from uaf.loader import UAFLoader
+
+# 1. Initialize Loader
+uaf_loader = UAFLoader("my-agent.uaf")
 ```
 
 ### Loading an Agent
@@ -43,7 +46,7 @@ You can optionally pass any runtime dependencies (like LLMs, API keys, or databa
 
 ```python
 from langchain_ollama import ChatOllama
-from uaf_compiler.loader import UAFLoader
+from uaf.loader import UAFLoader
 
 llm = ChatOllama(model="gemma3:4b")
 loader = UAFLoader("agents/my-langchain-agent.uaf")
